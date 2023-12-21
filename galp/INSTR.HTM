@@ -1,0 +1,563 @@
+<!DOCTYPE HTML PUBLIC "-//SQ//DTD HTML 2.0 HoTMetaL + extensions//EN">
+<HTML><HEAD><TITLE>GameBoy Assembly Language Primer - Instructions</TITLE></HEAD>
+<BODY><CENTER><H2>GameBoy Assembly Language Primer</H2></CENTER>
+<HR>
+<CENTER><H2>GameBoy Instruction Set</H2></CENTER>
+<PRE> <STRONG>ADC A,</STRONG>n        - Add n + Carry flag to A.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL],</STRONG>#
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Set if carry from bit 3.
+            C - Set if carry from bit 7.
+
+
+ <STRONG>ADD A,</STRONG>n        - Add n to A.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL],</STRONG>#
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Set if carry from bit 3.
+            C - Set if carry from bit 7.
+
+
+ <STRONG>ADD HL,</STRONG>nn      - Add n to HL.
+
+        nn = <STRONG>BC,DE,HL</STRONG>
+
+        Flags affected:
+            Z - Not affected.
+            N - Reset.
+            H - Set if carry from bit 11.
+            C - Set if carry from bit 15.
+
+
+ <STRONG>ADD SP,</STRONG>n       - Add n to Stack Pointer [SP].
+
+        n = one byte signed immediate value.
+
+        Flags affected:
+            Z - Reset.
+            N - Reset.
+            H - Set or reset according to operation.
+            C - Set or reset according to operation.
+
+
+ <STRONG>AND </STRONG>n          - Logically AND n with A, result in A.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL],</STRONG>#
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Set.
+            C - Reset.
+
+
+ <STRONG>BIT </STRONG>b,r        - Test bit b in register r.
+
+        b = <STRONG>0</STRONG> - <STRONG>7</STRONG>, r = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Set if bit b of register r is 0.
+            N - Reset.
+            H - Set.
+            C - Not affected.
+
+
+ <STRONG>CALL </STRONG>n         - Push address of next instruction onto
+                  stack and then jump to address n.
+
+
+ <STRONG>CALL </STRONG>cc,n      - Call address n if following condition
+                  is true:
+
+        cc = <STRONG>NZ</STRONG>, Call if Z flag is reset.
+        cc = <STRONG>Z</STRONG>,  Call if Z flag is set.
+        cc = <STRONG>NC</STRONG>, Call if C flag is reset.
+        cc = <STRONG>C</STRONG>,  Call if C flag is set.
+
+
+ <STRONG>CCF</STRONG>            - Complement carry flag.
+
+        If C flag is set, then reset it.
+        If C flag is reset, then set it.
+
+
+        Flags affected:
+            Z - Not affected.
+            N - Reset.
+            H - Reset.
+            C - Complemented.
+
+
+ <STRONG>CP </STRONG>n           - Compare A with n.
+
+        This is basically an A - n subtraction
+        instruction but the results are thrown away.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL],</STRONG>#
+
+        Flags affected:
+            Z - Set if result is zero. [Set if A = n.]
+            N - Set.
+            H - Set if no borrow from bit 4.
+            C - Set for no borrow. [Set if A &lt; n.]
+
+
+ <STRONG>CPL</STRONG>            - Complement A register. [Flip all bits.]
+
+        Flags affected:
+            Z - Not affected.
+            N - Set.
+            H - Set.
+            C - Not affected.
+
+
+ <STRONG>DAA</STRONG>            - Decimal adjust register A.
+
+        This instruction adjusts register A so that the
+        correct representation of Binary Coded Decimal
+        [BCD] is obtained.
+
+        Flags affected:
+            Z - Set if register A is zero.
+            N - Not affected.
+            H - Reset.
+            C - Set or reset according to operation.
+
+
+ <STRONG>DEC </STRONG>n          - Decrement register n.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Set if reselt is zero.
+            N - Set.
+            H - Set if no borrow from bit 4.
+            C - Not affected.
+
+
+ <STRONG>DEC </STRONG>nn         - Decrement register nn.
+
+        nn = <STRONG>BC,DE,HL,SP</STRONG>
+
+        Flags affected:
+            None
+
+
+ <STRONG>DI</STRONG>             - Disable interrupts.
+
+        This intruction disables interrupts but not immediately.
+        Interrupts are disabled after instruction after DI is
+        executed.
+
+        Flags affected:
+            None.
+
+
+ <STRONG>EI</STRONG>             - Enable interrupts.
+
+        This intruction enables interrupts but not immediately.
+        Interrupts are enabled after instruction after EI is
+        executed.
+
+        Flags affected:
+            None.
+
+
+ <STRONG>INC</STRONG> n          - Increment register n.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Set if carry from bit 3.
+            C - Not affected.
+
+
+ <STRONG>INC</STRONG> nn         - Increment register nn.
+
+        nn = <STRONG>BC,DE,HL,SP</STRONG>
+
+        Flags affected:
+            None.
+
+
+ <STRONG>JP</STRONG> n           - Jump to address n.
+
+        n = two byte immediate value. [LS byte first.]
+
+
+ <STRONG>JP</STRONG> cc,n        - Jump to address n if following condition
+                  is true:
+
+        n = two byte immediate value. [LS byte first.]
+
+        cc = <STRONG>NZ</STRONG>, Jump if Z flag is reset.
+        cc = <STRONG>Z</STRONG>,  Jump if Z flag is set.
+        cc = <STRONG>NC</STRONG>, Jump if C flag is reset.
+        cc = <STRONG>C</STRONG>,  Jump if C flag is set.
+
+
+ <STRONG>JP [HL]</STRONG>        - Jump to address contained in HL.
+
+
+ <STRONG>JR</STRONG> n           - Add n to current address and jump to it.
+
+        n = one byte signed immediate value
+
+
+ <STRONG>JR</STRONG> cc,n        - If following condition is true then
+                  add n to current address and jump to it:
+
+        n = one byte signed immediate value
+
+        cc = <STRONG>NZ</STRONG>, Jump if Z flag is reset.
+        cc = <STRONG>Z</STRONG>,  Jump if Z flag is set.
+        cc = <STRONG>NC</STRONG>, Jump if C flag is reset.
+        cc = <STRONG>C</STRONG>,  Jump if C flag is set.
+
+
+ <STRONG>HALT</STRONG>           - Power down CPU until an interrupt occurs.
+
+
+ <STRONG>LD A,</STRONG>n         - Put value n into A.
+
+        n = <STRONG>A,B,C,D,E,H,L,[BC],[DE],[HL],[</STRONG>nnnn<STRONG>]</STRONG>,#
+
+
+ <STRONG>LD</STRONG> n<STRONG>,A</STRONG>         - Put value A into n.
+
+        n = <STRONG>A,B,C,D,E,H,L,[BC],[DE],[HL],[</STRONG>nnnn<STRONG>]</STRONG>,#
+
+
+ <STRONG>LD A,[C]</STRONG>       - Put value at address $FF00 + register C into A.
+
+
+ <STRONG>LD A,[HL+]</STRONG>     - Same as LD A,[HLI].
+
+
+ <STRONG>LD A,[HL-]</STRONG>     - Same as LD A,[HLD].
+
+
+ <STRONG>LD A,[HLI]</STRONG>     - Put value at address HL into A. Increment HL.
+
+
+ <STRONG>LD A,[HLD]</STRONG>     - Put value at address HL into A. Decrement HL.
+
+
+ <STRONG>LD [C],A</STRONG>       - Put A into address $FF00 + register C.
+
+
+ <STRONG>LD [HL+],A</STRONG>     - Same as LD [HLI],A.
+
+
+ <STRONG>LD [HL-],A</STRONG>     - Same as LD [HLD],A.
+
+
+ <STRONG>LD [HLI],A</STRONG>     - Put A into memory address HL. Increment HL.
+
+
+ <STRONG>LD [HLD],A</STRONG>     - Put A into memory address HL. Decrement HL.
+
+
+ <STRONG>LD</STRONG> r1,r2       - Put value r2 into r1.
+
+        r1,r2 = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+
+ <STRONG>LD</STRONG> n,nn        - Put value nn into n.
+
+        n = <STRONG>BC,DE,HL,SP</STRONG>
+        nn = 16 bit immediate value
+
+
+ <STRONG>LD HL,SP+</STRONG>n     - Same as LDHL SP,n.
+
+
+ <STRONG>LD SP,HL</STRONG>       - Put HL into Stack Pointer [SP].
+
+
+ <STRONG>LD [</STRONG>n<STRONG>],SP</STRONG>      - Put Stack Pointer [SP] at address n.
+
+        n = two byte immediate address.
+
+
+ <STRONG>LDD A,[HL]</STRONG>     - Same as LD A,[HLD].
+
+
+ <STRONG>LDD [HL],A</STRONG>     - Same as LD [HLD],A.
+
+
+ <STRONG>LDH [</STRONG>n<STRONG>],A</STRONG>      - Put A into memory address $FF00+n.
+
+        n = one byte immediate value.
+
+
+ <STRONG>LDH A,[</STRONG>n<STRONG>]</STRONG>      - Put memory address $FF00+n into A.
+
+        n = one byte immediate value.
+
+
+ <STRONG>LDHL SP,</STRONG>n      - Put SP + n effective address into HL.
+
+        n = one byte signed immediate value.
+
+        Flags affected:
+            Z - Reset.
+            N - Reset.
+            H - Set or reset according to operation.
+            C - Set or reset according to operation.
+
+
+ <STRONG>LDI A,[HL]</STRONG>     - Same as LD A,[HLI].
+
+
+ <STRONG>LDI [HL],A</STRONG>     - Same as LD [HLI],A.
+
+
+ <STRONG>NOP</STRONG>            - No operation.
+
+
+ <STRONG>OR</STRONG> n           - Logical OR n with register A, result in A.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL],</STRONG>#
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Reset.
+            C - Reset.
+
+
+ <STRONG>POP</STRONG> nn         - Pop two bytes off stack into register pair nn.
+                  Increment Stack Pointer [SP] twice.
+
+        nn = <STRONG>AF,BC,DE,HL</STRONG>
+
+
+ <STRONG>PUSH</STRONG> nn        - Push register pair nn onto stack.
+                  Decrement Stack Pointer [SP] twice.
+
+        nn = <STRONG>AF,BC,DE,HL</STRONG>
+
+
+ <STRONG>RES</STRONG> b,r        - Reset bit b in register r.
+
+        b = <STRONG>0</STRONG> - <STRONG>7</STRONG>, r = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            None.
+
+
+ <STRONG>RET</STRONG>            - Pop two bytes from stack &amp; jump to that address.
+
+
+ <STRONG>RET</STRONG> cc         - Return if following condition is true:
+
+        cc = <STRONG>NZ</STRONG>, Return if Z flag is reset.
+        cc = <STRONG>Z</STRONG>,  Return if Z flag is set.
+        cc = <STRONG>NC</STRONG>, Return if C flag is reset.
+        cc = <STRONG>C</STRONG>,  Return if C flag is set.
+
+
+ <STRONG>RETI</STRONG>           - Pop two bytes from stack &amp; jump to that address
+                  then enable interrupts.
+
+ <STRONG>RL</STRONG> n           - Rotate n left through Carry flag.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Reset.
+            C - Contains old bit 7 data.
+
+
+ <STRONG>RLA</STRONG>            - Rotate A left through Carry flag.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Reset.
+            N - Reset.
+            H - Reset.
+            C - Contains old bit 7 data.
+
+
+ <STRONG>RLC</STRONG> n          - Rotate n left. Old bit 7 to Carry flag.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Reset.
+            C - Contains old bit 7 data.
+
+
+ <STRONG>RLCA</STRONG>           - Rotate A left. Old bit 7 to Carry flag.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Reset.
+            N - Reset.
+            H - Reset.
+            C - Contains old bit 7 data.
+
+
+ <STRONG>RR</STRONG> n           - Rotate n right through Carry flag.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Reset.
+            C - Contains old bit 0 data.
+
+
+ <STRONG>RRA</STRONG>            - Rotate A right through Carry flag.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Reset.
+            N - Reset.
+            H - Reset.
+            C - Contains old bit 0 data.
+
+
+ <STRONG>RRC</STRONG> n          - Rotate n right. Old bit 0 to Carry flag.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Reset.
+            C - Contains old bit 0 data.
+
+
+ <STRONG>RRCA</STRONG>           - Rotate A right. Old bit 0 to Carry flag.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Reset.
+            N - Reset.
+            H - Reset.
+            C - Contains old bit 0 data.
+
+
+ <STRONG>RST</STRONG> n          - Push present address onto stack.
+                  Jump to address $0000 + n.
+
+        n = <STRONG>$00,$08,$10,$18,$20,$28,$30,$38</STRONG>
+
+
+ <STRONG>SBC A,</STRONG>n        - Subtract n + Carry flag from A.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL],</STRONG>#
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Set.
+            H - Set if no borrow from bit 4.
+            C - Set if no borrow.
+
+
+ <STRONG>SCF</STRONG>            - Set Carry flag.
+
+        Flags affected:
+            Z - Not affected.
+            N - Reset.
+            H - Reset.
+            C - Set.
+
+
+ <STRONG>SET</STRONG> b,r        - Set bit b in register r.
+
+        b = <STRONG>0</STRONG> - <STRONG>7</STRONG>, r = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            None.
+
+
+ <STRONG>SLA</STRONG> n          - Shift n left into Carry. LSB of n set to 0.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Reset.
+            C - Contains old bit 7 data.
+
+
+ <STRONG>SRA</STRONG> n          - Shift n right into Carry. MSB doesn't change.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Reset.
+            C - Contains old bit 0 data.
+
+
+ <STRONG>SRL</STRONG> n          - Shift n right into Carry. MSB set to 0.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Reset.
+            C - Contains old bit 0 data.
+
+ <STRONG>STOP</STRONG>           - Halt CPU &amp; LCD display until button press.
+
+
+ <STRONG>SUB</STRONG> n          - Subtract n from A.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL],</STRONG>#
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Set.
+            H - Set if no borrow from bit 4.
+            C - Set if no borrow.
+
+
+ <STRONG>SWAP</STRONG> n         - Swap upper &amp; lower bits of n.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL]</STRONG>
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Reset.
+            C - Reset.
+
+
+ <STRONG>XOR</STRONG> n          - Logical exclusive OR n with
+                  register A, result in A.
+
+        n = <STRONG>A,B,C,D,E,H,L,[HL],</STRONG>#
+
+        Flags affected:
+            Z - Set if result is zero.
+            N - Reset.
+            H - Reset.
+            C - Reset.
+</PRE>
+<HR></BODY></HTML>

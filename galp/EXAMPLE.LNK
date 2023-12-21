@@ -1,0 +1,7 @@
+# Linkfile for Pan Library Demo
+
+[Objects]
+example.obj
+
+[Output]
+example.gb

@@ -1,0 +1,11 @@
+C:\Users\User1\Documents\synth\forthGameboy\BGBTerm\BGBTerm\BGBTerm\bin\Debug\netcoreapp2.1\BGBTerm.deps.json
+C:\Users\User1\Documents\synth\forthGameboy\BGBTerm\BGBTerm\BGBTerm\bin\Debug\netcoreapp2.1\BGBTerm.runtimeconfig.json
+C:\Users\User1\Documents\synth\forthGameboy\BGBTerm\BGBTerm\BGBTerm\bin\Debug\netcoreapp2.1\BGBTerm.runtimeconfig.dev.json
+C:\Users\User1\Documents\synth\forthGameboy\BGBTerm\BGBTerm\BGBTerm\bin\Debug\netcoreapp2.1\BGBTerm.dll
+C:\Users\User1\Documents\synth\forthGameboy\BGBTerm\BGBTerm\BGBTerm\bin\Debug\netcoreapp2.1\BGBTerm.pdb
+C:\Users\User1\Documents\synth\forthGameboy\BGBTerm\BGBTerm\BGBTerm\obj\Debug\netcoreapp2.1\BGBTerm.csproj.AssemblyReference.cache
+C:\Users\User1\Documents\synth\forthGameboy\BGBTerm\BGBTerm\BGBTerm\obj\Debug\netcoreapp2.1\BGBTerm.csproj.CoreCompileInputs.cache
+C:\Users\User1\Documents\synth\forthGameboy\BGBTerm\BGBTerm\BGBTerm\obj\Debug\netcoreapp2.1\BGBTerm.AssemblyInfoInputs.cache
+C:\Users\User1\Documents\synth\forthGameboy\BGBTerm\BGBTerm\BGBTerm\obj\Debug\netcoreapp2.1\BGBTerm.AssemblyInfo.cs
+C:\Users\User1\Documents\synth\forthGameboy\BGBTerm\BGBTerm\BGBTerm\obj\Debug\netcoreapp2.1\BGBTerm.dll
+C:\Users\User1\Documents\synth\forthGameboy\BGBTerm\BGBTerm\BGBTerm\obj\Debug\netcoreapp2.1\BGBTerm.pdb
