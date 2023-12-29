@@ -305,6 +305,7 @@ SECTION "Console out buffer", WRAM0
 	CHasOutgrownScreenFlag: db
 	CCursorHoverValue: db
 	CCursorBlinkTimer: db
+	CGetCharFlag: db
 
 
 SECTION "interpreter variables", HRAM
@@ -540,15 +541,20 @@ ShiftUp:
 
 
 Serial_ISR:
+	push af
 	push bc
-	ld a, [rSB]
-	ld b, a
-	call putc
+	ld a, [CGetCharFlag]
+	cp a, 1
+	jp z, .getCFlagSet
+	jp .getCFlagNotSet
+.getCFlagSet:
+	ld a, 0
+	ld [CGetCharFlag], a
+.getCFlagNotSet:
 	ld a, $80
 	ld [rSC], a
-	ld a, 1
-	ld [rSB], a
 	pop bc
+	pop af
 	ret
 
 
@@ -671,6 +677,8 @@ ConsoleInit:
 	ld [CCursorHoverValue], a
 	ld a, 0
 	ld [CCursorBlinkTimer], a
+	ld a, 0
+	ld [CGetCharFlag], a
 	ret
 OnRowOverflow:
 	ld e, 0
@@ -777,7 +785,28 @@ AdvanceCursor:
 .end:
 	ret
 
+PollGetCharFlagValue:
+	; a: getChar flag value
+	di
+	ld a, [CGetCharFlag]
+	ei
+	ret;
 
+getc:
+	; wait for char
+	; returns
+	; a: char
+	di
+	ld a, 1
+	ld [CGetCharFlag], a
+	ei
+.loop:
+	halt
+	call PollGetCharFlagValue
+	cp a, 1
+	jp z, .loop
+	ld a, [rSB]
+	ret
 
 putc:
 	; b: character to output
@@ -907,10 +936,10 @@ EntryPoint:
 	ld sp, $fffe
 	call Init
 	; Now we turn on the LCD display to view the results!
-	ld hl, TestString
-	ld de, 12
-	call FPrint
-	StoreCellLiteralHRAM IPtr, Thread
+	;ld hl, TestString
+	;ld de, 12
+	;call FPrint
+	;StoreCellLiteralHRAM IPtr, Thread
 	
 	;jp Top
 	; serial - set as slave
@@ -919,11 +948,14 @@ EntryPoint:
     ld a, $80
 	ld [rSC], a
 	
-	ld de, Word2Find
-	ld b, 3
-	call FindWord 
+	;ld de, Word2Find
+	;ld b, 3
+	;call FindWord 
 MainLoop:
-	halt
+	;halt
+	call getc
+	ld b, a
+	call putc
 	jp MainLoop
 
 FindWord:
