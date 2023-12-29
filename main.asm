@@ -775,8 +775,9 @@ AdvanceCursor:
 .noWidthOverflow:
 	ldh [ConsoleOnColumn], a
 .end:
-	
 	ret
+
+
 
 putc:
 	; b: character to output

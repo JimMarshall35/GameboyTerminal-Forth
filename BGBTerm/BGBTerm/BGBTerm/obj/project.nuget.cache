@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "fUPYrRfHWp7xbBDusk+7JrIhSK/3jdgrx8XGNoReCWi8Ca1gLPR4YKiTSkeY06nNtL3Z0FsTHpBAtnds5BFjFA==",
+  "dgSpecHash": "pdBKVpOnanq2tSI/VombiERYMG14z9J4Tt6c8yj9JPDE8gjS4ej4xhjZlM+DDSc03jA0NIoY7heL+MfWjOLNAA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\User1\\Documents\\synth\\forthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\BGBTerm.csproj",
+  "projectFilePath": "C:\\Users\\User1\\source\\repos\\forthGameboy\\ForthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\BGBTerm.csproj",
   "expectedPackageFiles": [
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.app\\2.1.0\\microsoft.netcore.app.2.1.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.dotnetapphost\\2.1.0\\microsoft.netcore.dotnetapphost.2.1.0.nupkg.sha512",

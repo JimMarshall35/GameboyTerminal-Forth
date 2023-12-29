@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\User1\\Documents\\synth\\forthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\BGBTerm.csproj": {}
+    "C:\\Users\\User1\\source\\repos\\forthGameboy\\ForthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\BGBTerm.csproj": {}
   },
   "projects": {
-    "C:\\Users\\User1\\Documents\\synth\\forthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\BGBTerm.csproj": {
+    "C:\\Users\\User1\\source\\repos\\forthGameboy\\ForthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\BGBTerm.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User1\\Documents\\synth\\forthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\BGBTerm.csproj",
+        "projectUniqueName": "C:\\Users\\User1\\source\\repos\\forthGameboy\\ForthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\BGBTerm.csproj",
         "projectName": "BGBTerm",
-        "projectPath": "C:\\Users\\User1\\Documents\\synth\\forthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\BGBTerm.csproj",
+        "projectPath": "C:\\Users\\User1\\source\\repos\\forthGameboy\\ForthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\BGBTerm.csproj",
         "packagesPath": "C:\\Users\\User1\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User1\\Documents\\synth\\forthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\obj\\",
+        "outputPath": "C:\\Users\\User1\\source\\repos\\forthGameboy\\ForthGameboy\\BGBTerm\\BGBTerm\\BGBTerm\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
