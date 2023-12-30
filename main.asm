@@ -93,7 +93,7 @@ MACRO MPushReturn
 ENDM
 
 MACRO MPopData
-	; pop from data stack, returning values into a register pair
+	; pop from data stack, returning values into a register pair other than hl
 	; \1 low register, \1 high register
 	LoadCellHRAM l, h, StackPtr
 	dec hl
@@ -248,12 +248,10 @@ MACRO WordHeader
 ENDM
 
 MACRO SecondaryWordHeader
-	; \1 word name, \2 next 
-	WordHeader \1, \2
-		LoadCellHRAM c, b, IPtr
-		MPushReturn c, b
-		ld bc, .thread
-		StoreCellFromRegisterPairHRAM c, b, IPtr
+	; \1 word name, \2 next \3 internal name (WordNameSize chars exactly in length) \4 name length 
+	WordHeader \1, \2, \3, \4
+		ld de, .thread
+		call EnterWord
 		jp Top
 	.thread:
 ENDM
@@ -323,6 +321,15 @@ SECTION "interpreter variables", HRAM
 	CurrentLineBufferSize: Cell
 
 SECTION "main", ROM0
+
+EnterWord:
+	; de: address of word to enter
+	LoadCellHRAM c, b, IPtr
+	MPushReturn c, b
+	ld b, d
+	ld c, e
+	StoreCellFromRegisterPairHRAM c, b, IPtr
+	ret
 
 BlankCurrentRow:
 	;d: row
@@ -1015,6 +1022,7 @@ MACRO ForthBranch0
 ENDM
 
 Thread:
+	dw TestFunc.body
 .MainLoopStart:
 	dw GetC.body
 	dw Emit.body
@@ -1057,8 +1065,11 @@ DictionaryStart:
 
 	WordHeader StoreCell, FetchCell, !, 1
 		; ( val address -- )
-		MPopData l, h 
+		MPopData e, d 
 		MPopData c, b
+		ld h, d
+		ld l, e
+
 		ld a, c
 		ld [hli], a
 		ld a, b
@@ -1067,23 +1078,29 @@ DictionaryStart:
 
 	WordHeader FetchCell, StoreByte, @, 1
 		; ( address -- CellValueAt )
-		MPopData l, h
-		ld [hli], a
+		MPopData c, b
+		ld h, b
+		ld l, c
+		ld a, [hli]
 		ld c, a
-		ld [hl], a
+		ld a, [hli]
 		ld b, a
 		MPushData c, b
 		jp Top
 
 	WordHeader StoreByte, FetchByte, c!, 2
-		MPopData l, h
+		MPopData e, d
 		MPopData c, b
+		ld h, d
+		ld l, e
 		ld [hl], c
 		jp Top
 
 	WordHeader FetchByte, RelativeBranch, c@, 2
 		; ( address -- ByteValueAt )
-		MPopData l, h
+		MPopData c, b
+		ld h, b
+		ld l, c
 		ld a, [hl]
 		ld c, a
 		ld b, 0
@@ -1098,7 +1115,9 @@ DictionaryStart:
 		jp Top
 
 	WordHeader RelativeBranchIfZero, Return, br0, 3
-		MPopData l, h
+		MPopData c, b
+		ld h, b
+		ld l, c
 		ld a, 0
 		cp a, h
 		jp nz, .notZero
@@ -1114,8 +1133,8 @@ DictionaryStart:
 		jp Top
 
 	WordHeader Return, MulData, ret, 3
-		MPopReturn l, h
-		StoreCellFromRegisterPairHRAM l, h, IPtr
+		MPopReturn c, b
+		StoreCellFromRegisterPairHRAM c, b, IPtr
 		jp Top
 
 	WordHeader MulData, DivData, *, 1
@@ -1134,15 +1153,20 @@ DictionaryStart:
 		MPushData e, d
 		jp Top
 
-	WordHeader Emit, 0, emit, 4
+	WordHeader Emit, GetC, emit, 4
 		MPopData c, b
 		ld b, c
 		call putc
 		jp Top
 
-	WordHeader GetC, 0, getc, 4
+	WordHeader GetC, TestFunc, getc, 4
 		call getc
 		ld c, a
 		ld b, 0
 		MPushData c, b
 		jp Top
+
+	SecondaryWordHeader TestFunc, 0, test, 4
+		dw PushData.body
+		dw 42
+		dw Return.body
