@@ -252,7 +252,7 @@ MACRO SecondaryWordHeader
 	WordHeader \1, \2
 		LoadCellHRAM c, b, IPtr
 		MPushReturn c, b
-		ld bc, thread
+		ld bc, .thread
 		StoreCellFromRegisterPairHRAM c, b, IPtr
 		jp Top
 	.thread:
@@ -282,8 +282,7 @@ SECTION "Header", ROM0[$100]
 
 	ds $150 - @, 0 ; Make room for the header
 
-def DataStackSize equ 16 * CellSizeBytes
-def ReturnStackSize equ 16 * CellSizeBytes
+
 def GameboyScreenWidthTiles equ 20
 def GameboyScreenHeightTiles equ 18
 def TerminalCursorKey equ $db
@@ -307,7 +306,9 @@ SECTION "Console out buffer", WRAM0
 	CCursorBlinkTimer: db
 	CGetCharFlag: db
 
-
+def DataStackSize equ 16 * CellSizeBytes
+def ReturnStackSize equ 16 * CellSizeBytes
+def LineBufferSize equ GameboyScreenWidthTiles
 SECTION "interpreter variables", HRAM
 	_MD16temp:    ds 2
 	_MD16count:   db
@@ -318,6 +319,8 @@ SECTION "interpreter variables", HRAM
 	ReturnStackPtr: Cell
 	Stack: ds DataStackSize
 	ReturnStack: ds ReturnStackSize
+	LineBuffer: ds LineBufferSize
+	CurrentLineBufferSize: Cell
 
 SECTION "main", ROM0
 
@@ -931,28 +934,13 @@ CompareBytes:
 	pop hl
 	pop de
 	ret
-Word2Find: db "bro"
 EntryPoint:
 	ld sp, $fffe
 	call Init
-	; Now we turn on the LCD display to view the results!
-	;ld hl, TestString
-	;ld de, 12
-	;call FPrint
-	;StoreCellLiteralHRAM IPtr, Thread
-	
-	;jp Top
-	; serial - set as slave
-	ld a, 1
-	ld [rSB], a
-    ld a, $80
-	ld [rSC], a
-	
-	;ld de, Word2Find
-	;ld b, 3
-	;call FindWord 
+	ld hl, Thread
+	StoreCellFromRegisterPairHRAM l, h, IPtr
+	jp Top
 MainLoop:
-	;halt
 	call getc
 	ld b, a
 	call putc
@@ -1014,39 +1002,24 @@ FindWord:
 .loopEnd:
 	ret
 
+MACRO ForthBranch
+	; create a forth branch token, branching to offset
+	; automatically calcualated from \1: an assembler label
+	dw RelativeBranch.body
+	dw \1 - (@ + 2)
+ENDM
+
+MACRO ForthBranch0
+	dw RelativeBranchIfZero.body
+	dw \1 - (@ + 2)
+ENDM
 
 Thread:
-	dw PushData.body
-	dw 400
-	dw PushData.body
-	dw -20
-	dw AddData.body
-
-	dw PushData.body
-	dw 420
-	dw PushData.body
-	dw 130
-	dw SubData.body
-
-	dw PushData.body
-	dw 3
-	dw PushData.body
-	dw 3
-	dw MulData.body
-
-	dw PushData.body
-	dw 40
-	dw PushData.body
-	dw 10
-	dw MulData.body
-
-	;dw PushData.body
-	;dw 12
-	;dw PushData.body
-	;dw 3
-	;dw DivData.body
-
-	dw MainLoop
+.MainLoopStart:
+	dw GetC.body
+	dw Emit.body
+	ForthBranch .MainLoopStart
+	dw MainLoop ; keep at end
 
 DictionaryStart:
 	WordHeader PopData, PushData, pop, 3
@@ -1167,3 +1140,9 @@ DictionaryStart:
 		call putc
 		jp Top
 
+	WordHeader GetC, 0, getc, 4
+		call getc
+		ld c, a
+		ld b, 0
+		MPushData c, b
+		jp Top
