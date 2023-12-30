@@ -234,16 +234,16 @@ ENDM
 
 def WordNameLengthOffset equ 0
 def WordNextOffset equ 1
-def WordNameOffset equ 3
+def WordCodeOffset equ 3
+def WordNameOffset equ 5
 MACRO WordHeader
 	; \1 word name, \2 next \3 internal name (WordNameSize chars exactly in length) \4 name length 
 	
 	\1:
 	.nameLength: db \4
 	.next: dw \2
-	.name: db "\3"
-	
 	.code: dw .body
+	.name: db "\3"
 	.body:
 ENDM
 
@@ -901,7 +901,7 @@ FPrint:
 ; CONSOLE FUNCTIONS END
 
 TestString:
-db "Hello World!"
+db "c@"
 
 CompareBytes:
 	; a length
@@ -943,7 +943,16 @@ CompareBytes:
 	ret
 EntryPoint:
 	ld sp, $fffe
+
+	; test FindWord
+	ld de, TestString
+	ld b, 2
+	call FindWord
+
 	call Init
+
+
+
 	ld hl, Thread
 	StoreCellFromRegisterPairHRAM l, h, IPtr
 	jp Top
@@ -957,7 +966,7 @@ FindWord:
 	; de: word chars ptr
 	; b: word length
 	; returns:
-	; hl: word address
+	; hl: word body address
 	; b: was found
 
 	ld hl, DictionaryStart
@@ -979,6 +988,16 @@ FindWord:
 	jp z, .found
 	jp .notFound
 .found:
+	; add offset for code field
+	ld de, WordCodeOffset
+	add hl, de
+	; dereference
+	ld a, [hli]
+	ld e, a
+	ld a, [hli]
+	ld d, a
+	ld h, d
+	ld l, e
 	ld b, 1
 	jp .loopEnd
 .notFound:
