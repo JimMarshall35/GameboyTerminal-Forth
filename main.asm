@@ -286,6 +286,7 @@ def GameboyScreenHeightTiles equ 18
 def TerminalCursorKey equ $db
 def CursorTimerOverflowAt equ 30 ; toggle after this many vblanks
 def BackspaceAsciiVal equ $08
+def NewlineAsciiVal equ $0a
 SECTION "Console out buffer", WRAM0
 	def ShiftUpAddressValue equ 1
 	def CVRAMChangeStructSize equ 3
@@ -306,7 +307,7 @@ SECTION "Console out buffer", WRAM0
 
 def DataStackSize equ 16 * CellSizeBytes
 def ReturnStackSize equ 16 * CellSizeBytes
-def LineBufferSize equ GameboyScreenWidthTiles
+def MaxLineBufferSize equ 19
 SECTION "interpreter variables", HRAM
 	_MD16temp:    ds 2
 	_MD16count:   db
@@ -317,7 +318,7 @@ SECTION "interpreter variables", HRAM
 	ReturnStackPtr: Cell
 	Stack: ds DataStackSize
 	ReturnStack: ds ReturnStackSize
-	LineBuffer: ds LineBufferSize
+	LineBuffer: ds MaxLineBufferSize
 	CurrentLineBufferSize: Cell
 
 SECTION "main", ROM0
@@ -604,12 +605,11 @@ StopLCD:
 
     ret
 
-Init:
+HardwareInit:
 	; Shut down audio circuitry
     ld a, 0
     ld [rNR52], a
-
-    call ConsoleInit
+    
     call StopLCD
 
     ld a, IEF_SERIAL | IEF_VBLANK
@@ -621,10 +621,6 @@ Init:
 	ld a, 1
 	ld [rSB], a
 
-
-	StoreCellLiteralHRAM StackPtr, Stack
-	StoreCellLiteralHRAM ReturnStackPtr, ReturnStack
-	
 	;  Here we are going to setup the background tile
 	; palette so that the tiles appear in the proper
 	; shades of grey.
@@ -658,16 +654,23 @@ Init:
     ld      hl,$9800
     ld      bc,SCRN_VX_B * SCRN_VY_B
     call    mem_Set
-
-
 	
 
     ld      a,LCDCF_ON|LCDCF_BG8000|LCDCF_BG9800|LCDCF_BGON|LCDCF_OBJ16|LCDCF_OBJOFF
     ld      [rLCDC],a       ; Turn screen on
+	ret
 
-	; Since we have accomplished our goal, we now have nothing
-	; else to do. As a result, we just Jump to a label that
-	; causes an infinite loop condition to occur.
+ForthInit:
+	; init forth variables
+	StoreCellLiteralHRAM StackPtr, Stack
+	StoreCellLiteralHRAM ReturnStackPtr, ReturnStack
+	StoreCellLiteralHRAM CurrentLineBufferSize, 0
+	ret
+
+Init:
+	call HardwareInit
+	call ConsoleInit
+	call ForthInit
 	ret
 ; CONSOLE FUNCTIONS START
 ConsoleInit:
@@ -828,7 +831,7 @@ putc:
 		ldh a, [ConsoleOnColumn]
 		ld e, a
 		; check for newline
-		ld a, $0a
+		ld a, NewlineAsciiVal
 		cp a, b
 		jp z, .newLine
 		; check for backspace
@@ -952,7 +955,7 @@ EntryPoint:
 	call Init
 
 
-
+	; start interpretting the forth "main" function - tf
 	ld hl, Thread
 	StoreCellFromRegisterPairHRAM l, h, IPtr
 	jp Top
@@ -1040,15 +1043,81 @@ MACRO ForthBranch0
 	dw \1 - (@ + 2)
 ENDM
 
+
 Thread:
-	dw TestFunc.body
+	; Outer interpretter: threaded forth code written assembly style. 
+	; todo: write compiler that outputs this from written forth source code
 .MainLoopStart:
-	dw GetC.body
-	dw Emit.body
+	dw GetC.body ; ( char )
+	dw Dup.body                      ; ( char char )
+	dw PushData.body                 ; ( char char BackspaceAsciiVal )
+	dw NewlineAsciiVal
+	dw SubData.body                  ; ( char comparisonVal )
+	ForthBranch0 .EnterPressed       ; ( char )
+
+	dw Dup.body                      ; ( char char )
+	dw PushData.body                 ; ( char char BackspaceAsciiVal )
+	dw BackspaceAsciiVal
+	dw SubData.body                  ; ( char comparisonVal )
+	ForthBranch0 .backspacePressed   ; ( char )
+
+	; push current line buffer size onto stack
+	dw PushData.body             ; ( char &CurrentLineBufferSize )
+	dw CurrentLineBufferSize
+	dw FetchCell.body            ; ( char CurrentLineBufferSize )
+
+	; push max size onto stack
+	dw PushData.body             ; ( char CurrentLineBufferSize MaxSize )
+	dw MaxLineBufferSize
+
+	; compare and branch to .LineBufferFull if equal
+	dw SubData.body              ; ( char comparisonResult )
+	ForthBranch0 .LineBufferFull ; ( char )
+	; else branch to LineBufferNotFul;
+	ForthBranch .LineBufferNotFull
+.LineBufferFull:
+	dw PopData.body               ; (  )
+	ForthBranch .MainLoopStart
+.LineBufferNotFull:
+	; increment CurrentLineBufferSize
+	dw PushData.body           ; ( char &CurrentLineBufferSize )
+	dw CurrentLineBufferSize
+	dw FetchCell.body          ; ( char CurrentLineBufferSize )
+	dw PushData.body           ; ( char CurrentLineBufferSize 1 )
+	dw 1
+	dw AddData.body            ; ( char CurrentLineBufferSize+1 )
+	dw PushData.body           ; ( char CurrentLineBufferSize+1 &CurrentLineBufferSize )
+	dw CurrentLineBufferSize   
+	dw StoreCell.body          ; ( char )
+
+
+	dw Emit.body               ; (  )
+	ForthBranch .MainLoopStart
+.EnterPressed:
+	dw PopData.body               ; (  )
+	ForthBranch .MainLoopStart
+.backspacePressed:
+	dw PushData.body           ; ( char &CurrentLineBufferSize )
+	dw CurrentLineBufferSize
+	dw FetchCell.body          ; ( char CurrentLineBufferSize )
+	dw PushData.body           ; ( char CurrentLineBufferSize 1 )
+	dw 1
+	dw SubData.body            ; ( char CurrentLineBufferSize+1 )
+	dw PushData.body           ; ( char CurrentLineBufferSize+1 &CurrentLineBufferSize )
+	dw CurrentLineBufferSize   
+	dw StoreCell.body          ; ( char )
+
+	dw Emit.body               ; (  )
 	ForthBranch .MainLoopStart
 	dw MainLoop ; keep at end
 
 DictionaryStart:
+	WordHeader Dup, PopData, dup, 3
+		MPopData c, b
+		MPushData c, b
+		MPushData c, b
+		jp Top
+
 	WordHeader PopData, PushData, pop, 3
 		MPopData c, b
 		jp Top
@@ -1142,7 +1211,7 @@ DictionaryStart:
 		jp nz, .notZero
 		cp a, l
 		jp nz, .notZero
-		PeekCellLiteral c, b           ; done like this to be like my C forth version - only skip over the branch offset literal if we don't branch
+		ReadCellLiteral c, b           
 		LoadCellHRAM l, h, IPtr
 		add hl, bc
 		StoreCellFromRegisterPairHRAM l, h, IPtr
