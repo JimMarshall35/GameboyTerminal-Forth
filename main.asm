@@ -901,6 +901,61 @@ FPrint:
 .endLoop:
 	ei
 	ret
+
+HexPrintTable: db "0123456789abcdef"
+
+PrintHighNybble:
+	; a: byte to print high nybble of 
+	rrca
+	rrca
+	rrca
+	rrca
+	and a, $f
+	ld e, a
+	ld hl, HexPrintTable
+	add hl, de
+	push bc
+	ld a, [hl]
+	ld b, a
+	call putc
+	pop bc
+	ret
+
+PrintLowNybble:
+	; a: byte to print low nybble of 
+	and a, $f
+	ld e, a
+	ld hl, HexPrintTable
+	add hl, de
+	push bc
+	ld a, [hl]
+	ld b, a
+	call putc
+	pop bc
+	ret
+
+PrintCellHex:
+	; bc: cell
+	push de
+	push hl
+	ld d, 0
+
+	ld a, b
+	call PrintHighNybble
+
+	ld a, b
+	call PrintLowNybble
+
+	ld a, c
+	call PrintHighNybble
+
+	ld a, c
+	call PrintLowNybble
+
+	pop hl
+	pop de
+	ret
+
 ; CONSOLE FUNCTIONS END
 
 TestString:
@@ -1083,6 +1138,14 @@ Thread:
 	dw PushData.body           ; ( char &CurrentLineBufferSize )
 	dw CurrentLineBufferSize
 	dw FetchCell.body          ; ( char CurrentLineBufferSize )
+	
+	dw TwoDup.body             ; ( char CurrentLineBufferSize char CurrentLineBufferSize )
+	dw PushData.body           ; ( char CurrentLineBufferSize char CurrentLineBufferSize LineBuffer )
+	dw LineBuffer
+	dw AddData.body            ; ( char CurrentLineBufferSize char addrToWrite )
+	dw StoreByte.body          ; ( char CurrentLineBufferSize )
+
+
 	dw PushData.body           ; ( char CurrentLineBufferSize 1 )
 	dw 1
 	dw AddData.body            ; ( char CurrentLineBufferSize+1 )
@@ -1097,21 +1160,86 @@ Thread:
 	dw PopData.body               ; (  )
 	ForthBranch .MainLoopStart
 .backspacePressed:
-	dw PushData.body           ; ( char &CurrentLineBufferSize )
+	dw PushData.body                     ; ( char &CurrentLineBufferSize )
 	dw CurrentLineBufferSize
-	dw FetchCell.body          ; ( char CurrentLineBufferSize )
-	dw PushData.body           ; ( char CurrentLineBufferSize 1 )
+	;dw Show.body
+	dw FetchCell.body                    ; ( char CurrentLineBufferSize )
+
+	dw Dup.body                          ; ( char CurrentLineBufferSize CurrentLineBufferSize )
+	ForthBranch0 .backspaceOnEmptyBuffer ; ( char CurrentLineBufferSize )
+
+	dw PushData.body                     ; ( char CurrentLineBufferSize 1 )
 	dw 1
-	dw SubData.body            ; ( char CurrentLineBufferSize+1 )
-	dw PushData.body           ; ( char CurrentLineBufferSize+1 &CurrentLineBufferSize )
+	dw SubData.body                      ; ( char CurrentLineBufferSize+1 )
+	dw PushData.body                     ; ( char CurrentLineBufferSize+1 &CurrentLineBufferSize )
 	dw CurrentLineBufferSize   
-	dw StoreCell.body          ; ( char )
+	dw StoreCell.body                     ; ( char )
 
 	dw Emit.body               ; (  )
 	ForthBranch .MainLoopStart
+.backspaceOnEmptyBuffer:
+	dw Show.body
+	dw PopData.body
+	dw PopData.body
+	dw Show.body
+	ForthBranch .MainLoopStart
 	dw MainLoop ; keep at end
 
+
+def ShowStringEnd equ "]"
+def ShowStringStart equ "["
+
 DictionaryStart:
+	WordHeader Show, TwoDup, show, 4
+		; print the stack
+		ld b, NewlineAsciiVal
+		call putc
+		ld b, ShowStringStart
+		call putc
+		ld b, " "
+		call putc
+
+		LoadCellHRAM c, b, StackPtr
+		ld hl, Stack
+		ld d, 0
+		ld e, 2
+	.loop:
+		ld a, l
+		cp a, c
+		jp nz, .notEqual
+	.lowEquals:
+		ld a, h
+		cp a, b
+		jp nz, .notEqual
+	.highEqual:
+		jp .endLoop
+	.notEqual:
+		push bc
+		LoadCellFromHLHRAM c, b
+		call PrintCellHex
+		ld b, " "
+		call putc
+		pop bc
+		add hl, de 
+		
+		jp .loop
+	.endLoop:
+		ld b, ShowStringEnd
+		call putc
+		ld b, NewlineAsciiVal
+		call putc
+		jp Top
+
+
+	WordHeader TwoDup, Dup, 2dup, 4
+		MPopData c, b
+		MPopData e, d
+		MPushData e, d
+		MPushData c, b
+		MPushData e, d
+		MPushData c, b
+		jp Top
+
 	WordHeader Dup, PopData, dup, 3
 		MPopData c, b
 		MPushData c, b
@@ -1177,6 +1305,7 @@ DictionaryStart:
 		jp Top
 
 	WordHeader StoreByte, FetchByte, c!, 2
+		; ( val address -- )
 		MPopData e, d
 		MPopData c, b
 		ld h, d
