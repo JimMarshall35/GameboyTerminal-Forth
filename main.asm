@@ -318,7 +318,7 @@ SECTION "interpreter variables", HRAM
 	ReturnStackPtr: Cell
 	Stack: ds DataStackSize
 	ReturnStack: ds ReturnStackSize
-	LineBuffer: ds MaxLineBufferSize
+	LineBuffer: ds MaxLineBufferSize + 1
 	CurrentLineBufferSize: Cell
 
 SECTION "main", ROM0
@@ -1174,14 +1174,14 @@ Thread:
 	dw PushData.body                     ; ( char CurrentLineBufferSize+1 &CurrentLineBufferSize )
 	dw CurrentLineBufferSize   
 	dw StoreCell.body                     ; ( char )
-
+	;dw Show.body
 	dw Emit.body               ; (  )
 	ForthBranch .MainLoopStart
 .backspaceOnEmptyBuffer:
-	dw Show.body
+	;dw Show.body
 	dw PopData.body
 	dw PopData.body
-	dw Show.body
+	;dw Show.body
 	ForthBranch .MainLoopStart
 	dw MainLoop ; keep at end
 
