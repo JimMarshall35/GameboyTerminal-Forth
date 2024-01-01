@@ -1364,6 +1364,7 @@ DictionaryStart:
 		jp Top
 
 	WordHeader DivData, Emit, /, 1
+		; doesn't work (Need to double check and fix)
 		MPopData c, b 
 		MPopData e, d
 		MDivide
