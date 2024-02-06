@@ -1,0 +1,4 @@
+- Emulated keyboard peripheral for gameboy, using BGB's serial port emulation
+- C# program connects to it and acts like it's a keyboard peripheral
+- Terminal with getc and putc functions
+- Need to re-write the actual "Forth" aspect of it
